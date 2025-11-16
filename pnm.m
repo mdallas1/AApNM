@@ -236,6 +236,7 @@ function pnm(f,df,x0,varargin)
 	if plt
 		figure(2), hold on
 		semilogy([0:iters],flip(res_arr),plot_options{:});
+		set(gca,'fontsize',24);
 	end
 
 end
