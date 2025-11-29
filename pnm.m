@@ -31,6 +31,9 @@ function pnm(f,df,x0,varargin)
 	-- pnm(...,'maxiters',maxiters) sets 
 		 maximum iterations. Default is 100.
 
+	-- pnm(...,'beh') uses ||f'(x)^T * f(x)||
+		 as residual. 
+
 	-- pnm(...,'save','filename',<filename>) saves data to  
 		 spreadsheet named <filename>. If no name is given, then 
 		 a default one is used. 
@@ -76,6 +79,12 @@ function pnm(f,df,x0,varargin)
 
 	p.addSwitch('inexact');
 
+	p.addSwitch('beh1');
+	p.addSwitch('beh2');
+	p.addSwitch('beh3');
+	p.addSwitch('beh4');
+	p.addSwitch('beh4_res');
+
 	p.parse(varargin{:}); 
 	solver = p.Results.solver; m = p.Results.anderson; gsg_tol = p.Results.safeguard;
 	tol = p.Results.tol; maxiters = p.Results.maxiters; 
@@ -120,16 +129,21 @@ function pnm(f,df,x0,varargin)
 			end
 		end
 
+		if p.Results.beh1 || p.Results.beh2 || p.Results.beh3 || p.Results.beh4 || p.Results.beh4_res
+			beh_solve = 1; 
+		end
+
 	% - SOLVE
 	for k = 1:num_solves
 		x = x0(:,k); 
 		f = @(x) f(x); df = @(x) df(x);
 		fx = f(x); dfx = df(x); 
 		iters = 0; I = eye(length(x));
-		res = norm(fx); 
-		% ONLY FOR BEH PROBLEMS	
-		%res = norm(dfx' * fx); disp("USING BEH RESIDUAL")
-		
+		if beh_solve
+			res = norm(dfx' * fx); 
+		else 
+			res = norm(fx);
+		end
 		damping = 1; 
 		res_arr = []; x_arr = []; d_arr = []; xaa_arr = [];
 		if res < tol 
@@ -140,8 +154,16 @@ function pnm(f,df,x0,varargin)
 			if iters < 1
 				x_arr = [x x_arr]; 
 				if any(strcmp(solver,{'lm','LM'}))
-					mu = 0.5*1e-8*norm(fx)^2; % LM parameter from KaYaFu03
-					%mu = res; 
+					if p.Results.beh1 || p.Results.beh2 || p.Results.beh4_res
+						mu = res; 
+					elseif p.Results.beh3 
+						mu = 0.2;
+					elseif p.Results.beh4 
+						mu = 5;
+					else 
+						% LM PARAMETER FROM KaYaFu03
+						mu = 0.5*1e-8*norm(fx)^2; 
+					end
 					if p.Results.inexact
 						% inital forcing 0.5 follows Eisentat & Walker 
 						forcing = 0.5;
@@ -162,8 +184,16 @@ function pnm(f,df,x0,varargin)
 				x = x+d;
 			else 
 				if any(strcmp(solver,{'lm','LM'}))
-					mu = min(mu,nfx^2);						
-					%mu = res; 
+					if p.Results.beh1 || p.Results.beh2 || p.Results.beh4_res
+						mu = res; 
+					elseif p.Results.beh3 
+						mu = 0.2; 
+					elseif p.Results.beh4	
+						mu = 5;
+					else 
+						% LM PARAMETER FROM KaYaFu03
+						mu = min(mu,nfx^2);
+					end
 					dfx_dot = dfx'*dfx;
 					if p.Results.inexact
 						% EISENSTAT & WALKER CHOICE 2
@@ -211,13 +241,17 @@ function pnm(f,df,x0,varargin)
 			fx = f(x);
 			nfx = norm(fx); 
 			dfx = df(x);  
-			res = nfx; 
-			% ONLY FOR BEH PROBLEMS
-			%res = norm(dfx' * fx); disp("USING BEH RESIDUAL"); 
+			if beh_solve
+				res = norm(dfx' * fx); 	
+			else
+ 				res = nfx;
+			end
 			fprintf('%g,%g\n',iters,res)
+			if res < tol 
+				fprintf('Solve Complete.\n')	
+			end	
 		end
 		res_arr = [res res_arr];
-		x
 		if p.Results.save 
 			fid = fopen(filename,'a');
 			dlmwrite(filename,[0:iters],'-append');
@@ -229,14 +263,14 @@ function pnm(f,df,x0,varargin)
 	end
 		avg_iters = avg_iters / num_solves ;
 		avg_res = avg_res / num_solves;
-		fid = fopen(filename,'a');
-		dlmwrite(filename,[avg_iters avg_res],'-append');
-		fclose(fid);
+		if p.Results.save 
+			fid = fopen(filename,'a');
+			dlmwrite(filename,[avg_iters avg_res],'-append');
+			fclose(fid);
+		end
 
 	if plt
-		figure(2), hold on
 		semilogy([0:iters],flip(res_arr),plot_options{:});
-		set(gca,'fontsize',24);
 	end
 
 end

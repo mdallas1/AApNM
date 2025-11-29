@@ -1,15 +1,20 @@
 function out = Beh2(x)
 	% --------------------------------------------------------
-	% Implmentation of function given on p. 7 of 
+	% Implmentation of Ex. 5.2 on page 1118 of 
 	%
-	%	Behling R., Fischer A., Herrich M., Iusem A., and Ye Y.,
-	%	*A Levenberg-Marquardt method with approximate projections*, 
-	%	Comput. Optim. Appl., 2014.  
+	%	Behling R., Goncalves, D.S., and Santos, S.A., 
+	%	*Local Convergence Analysis of the Levenberg–Marquardt 
+	%	Framework for Nonzero-Residue Nonlinear Least-Squares 
+	% Problems Under an Error Bound Condition*, 
+	%	J. Op. and App., 2019.  
 	%
-	% local error bound holds on solution set, but Jacobian 
-	% is rank deficient. 
+	% Isolated Global minimizer at [-1;0]. 
+	% Local error bound holds. 
+	% Nonisolated set of local minimzers 
+	% when x_1 = 0. Rank of Jacobian varies. 
+	%
+	% x0 = [0.008;2.0];
 	% --------------------------------------------------------
-
-	out1 = x(2);
-	out2 = x(2)*exp(x(1));
-	out = [out1;out2];	
+	y1 = x(1).^3 - x(1).*x(2)+1; 
+	y2 = x(1).^3 + x(1).*x(2)+1;
+	out = [y1;y2];

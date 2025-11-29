@@ -1,6 +1,6 @@
-function out = dBeh1(x)
+function out = dBeh3(x)
 	% --------------------------------------------------------
-	% Implmentation of Jacobian of Ex. 5.1 on page 1117 of 
+	% Implmentation of Jacobian Ex. 5.3 on page 1119 of 
 	%
 	%	Behling R., Goncalves, D.S., and Santos, S.A., 
 	%	*Local Convergence Analysis of the Levenberg–Marquardt 
@@ -9,5 +9,6 @@ function out = dBeh1(x)
 	% J. Op. and App., 2019.  
 	%
 	% --------------------------------------------------------
-	J1 = [2*x(1) 2*x(2)]; 
-	out = [J1;J1];
+	J1 = [-(1/9)*sin(x(1))-x(2).*cos(x(1)), -sin(x(1))];
+	J2 = [(1/9)*cos(x(1))-x(2).*sin(x(1)), cos(x(1))];
+	out = [J1;J2];
