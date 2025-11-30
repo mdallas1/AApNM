@@ -131,6 +131,8 @@ function pnm(f,df,x0,varargin)
 
 		if p.Results.beh1 || p.Results.beh2 || p.Results.beh3 || p.Results.beh4 || p.Results.beh4_res
 			beh_solve = 1; 
+		else 
+			beh_solve = 0;
 		end
 
 	% - SOLVE
