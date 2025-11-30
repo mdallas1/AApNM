@@ -1,4 +1,4 @@
-# Code from ACSE publication "[Anderson Acceleration for Perturbed Newton Methods](https://doi.org/10.3934/acse.2025024)" 
+# Code from ACSE publication [Anderson Acceleration for Perturbed Newton Methods](https://doi.org/10.3934/acse.2025024)
 
 ## Matt Dallas 
 
